@@ -5,6 +5,8 @@ export type Movie = {
   title: string;
   poster_path: string;
   rating: number;
+  overview: string;
+  popularity: number;
 };
 
 export type Show = {
@@ -74,3 +76,29 @@ export const getPopularShows = async (page: number) => {
     console.error("Failed to fetch popular shows:", error);
   }
 };
+
+export async function searchMovies(
+  query: string,
+  page: number,
+): Promise<PopularMoviesResponse> {
+  const options = {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      Authorization: `Bearer ${import.meta.env.VITE_TMDB_API_KEY}`,
+    },
+  };
+
+  const res = await fetch(
+    `${URL}/search/movie?query=${encodeURIComponent(
+      query,
+    )}&language=en-US&page=${page}`,
+    options,
+  );
+
+  if (!res.ok) {
+    throw new Error(`Failed to search movies: ${res.status}`);
+  }
+
+  return res.json();
+}
