@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from "react";
 import type { Movie } from "../../../services/tmdb";
 import { usePopularMovies } from "../hooks";
 import { Link } from "react-router-dom";
+import AddFavoriteButton from "../../favorites/components/AddFavoriteButton";
 
 function ListMovies() {
   const {
@@ -49,6 +50,7 @@ function ListMovies() {
               {movie.id} - {movie.title} - {movie.rating} - {movie.poster_path}
               <Link to={`/movies/${movie.id}`}>more details</Link>
             </div>
+            <AddFavoriteButton movieData={movie} />
           </li>
         ))}
       </ul>
