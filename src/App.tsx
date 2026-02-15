@@ -6,6 +6,7 @@ import Movies from "./pages/Movies";
 import Home from "./pages/Home";
 import Shows from "./pages/Shows";
 import SearchMoviesPage from "./pages/SearchMoviesPage";
+import MovieDetailsPage from "./pages/MovieDetailsPage";
 
 const queryClient = new QueryClient();
 
@@ -18,7 +19,7 @@ function App(): ReactElement {
             <Route path="/" element={<Home />} />
             <Route path="/movies" element={<Movies />} />
             <Route path="/movies/new" element={<h1>movies on theater</h1>} />
-            <Route path="/movies/:id" element={<h1>movie data by id</h1>} />
+            <Route path="/movies/:id" element={<MovieDetailsPage />} />
             <Route path="/movies/search" element={<SearchMoviesPage />} />
             <Route path="/shows" element={<Shows />} />
             <Route
