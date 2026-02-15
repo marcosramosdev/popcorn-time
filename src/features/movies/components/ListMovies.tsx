@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import type { Movie } from "../../../services/tmdb";
 import { usePopularMovies } from "../hooks";
+import { Link } from "react-router-dom";
 
 function ListMovies() {
   const {
@@ -44,7 +45,10 @@ function ListMovies() {
       <ul>
         {movies.map((movie: Movie) => (
           <li key={movie.id}>
-            {movie.id} - {movie.title} - {movie.rating} - {movie.poster_path}
+            <div>
+              {movie.id} - {movie.title} - {movie.rating} - {movie.poster_path}
+              <Link to={`/movies/${movie.id}`}>more details</Link>
+            </div>
           </li>
         ))}
       </ul>
