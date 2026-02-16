@@ -1,129 +1,217 @@
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router-dom";
 import { useMovieDetails } from "../hooks";
+import LazyImage from "@/components/LazyImage";
+import {
+  tmdbImageUrl,
+  POSTER_DIMENSIONS,
+  BACKDROP_DIMENSIONS,
+} from "@/services/tmdb";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import ErrorBlock from "@/components/ErrorBlock";
+
+function MovieDetailsSkeleton() {
+  return (
+    <div className="space-y-8">
+      <Skeleton className="h-64 w-full rounded-xl sm:h-80" />
+      <div className="flex gap-6">
+        <Skeleton className="hidden aspect-[2/3] w-48 shrink-0 rounded-xl sm:block" />
+        <div className="flex-1 space-y-4">
+          <Skeleton className="h-8 w-3/4" />
+          <Skeleton className="h-5 w-1/2" />
+          <Skeleton className="h-20 w-full" />
+          <div className="flex gap-2">
+            <Skeleton className="h-6 w-16 rounded-full" />
+            <Skeleton className="h-6 w-16 rounded-full" />
+            <Skeleton className="h-6 w-16 rounded-full" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function MovieDetails() {
   const { id } = useParams();
-  const imageBaseUrl = "https://image.tmdb.org/t/p/w500";
-
+  const navigate = useNavigate();
   const { data, isLoading, error } = useMovieDetails(id);
 
-  if (!id) return <p>Movie id not found.</p>;
-  if (isLoading) return <p>Loading movie details...</p>;
-  if (error) return <p>Error loading movie details.</p>;
-  if (!data) return <p>Movie details not found.</p>;
+  if (!id) return <ErrorBlock message="Movie ID not found." />;
+  if (isLoading) return <MovieDetailsSkeleton />;
+  if (error) return <ErrorBlock message="Failed to load movie details." onRetry={() => window.location.reload()} />;
+  if (!data) return <ErrorBlock message="Movie not found." />;
+
+  const year = data.release_date ? new Date(data.release_date).getFullYear() : null;
+  const hours = data.runtime ? Math.floor(data.runtime / 60) : null;
+  const mins = data.runtime ? data.runtime % 60 : null;
 
   return (
-    <div>
-      <h1>{data.title}</h1>
-      <p>{data.tagline}</p>
+    <div className="space-y-8">
+      {/* Back button */}
+      <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="m12 19-7-7 7-7" />
+          <path d="M19 12H5" />
+        </svg>
+        Back
+      </Button>
 
-      <p>
-        <strong>Overview:</strong> {data.overview}
-      </p>
-      <p>
-        <strong>Original Title:</strong> {data.original_title}
-      </p>
-      <p>
-        <strong>Original Language:</strong> {data.original_language}
-      </p>
-      <p>
-        <strong>Status:</strong> {data.status}
-      </p>
-      <p>
-        <strong>Release Date:</strong> {data.release_date}
-      </p>
-      <p>
-        <strong>Runtime:</strong> {data.runtime ?? "N/A"} minutes
-      </p>
-      <p>
-        <strong>Adult:</strong> {data.adult ? "Yes" : "No"}
-      </p>
-      <p>
-        <strong>Video:</strong> {data.video ? "Yes" : "No"}
-      </p>
-      <p>
-        <strong>Popularity:</strong> {data.popularity}
-      </p>
-      <p>
-        <strong>Vote Average:</strong> {data.vote_average}
-      </p>
-      <p>
-        <strong>Vote Count:</strong> {data.vote_count}
-      </p>
-      <p>
-        <strong>Budget:</strong> {data.budget}
-      </p>
-      <p>
-        <strong>Revenue:</strong> {data.revenue}
-      </p>
-      <p>
-        <strong>IMDb ID:</strong> {data.imdb_id ?? "N/A"}
-      </p>
-      <p>
-        <strong>Homepage:</strong> {data.homepage || "N/A"}
-      </p>
-      {data.poster_path ? (
-        <div>
-          <p>
-            <strong>Poster:</strong>
-          </p>
-          <img
-            src={`${imageBaseUrl}${data.poster_path}`}
-            alt={`${data.title} poster`}
-          />
-        </div>
-      ) : (
-        <p>
-          <strong>Poster:</strong> N/A
-        </p>
-      )}
-
-      {data.backdrop_path ? (
-        <div>
-          <p>
-            <strong>Backdrop:</strong>
-          </p>
-          <img
-            src={`${imageBaseUrl}${data.backdrop_path}`}
+      {/* Backdrop hero */}
+      {data.backdrop_path && (
+        <div className="relative -mx-4 overflow-hidden rounded-xl sm:-mx-6">
+          <LazyImage
+            src={tmdbImageUrl(data.backdrop_path, "w1280")}
             alt={`${data.title} backdrop`}
+            width={BACKDROP_DIMENSIONS.w1280.width}
+            height={BACKDROP_DIMENSIONS.w1280.height}
+            className="w-full"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         </div>
-      ) : (
-        <p>
-          <strong>Backdrop:</strong> N/A
-        </p>
       )}
 
-      <p>
-        <strong>Genres:</strong>{" "}
-        {data.genres.length
-          ? data.genres.map((genre) => genre.name).join(", ")
-          : "N/A"}
-      </p>
-      <p>
-        <strong>Origin Countries:</strong>{" "}
-        {data.origin_country.length ? data.origin_country.join(", ") : "N/A"}
-      </p>
-      <p>
-        <strong>Production Countries:</strong>{" "}
-        {data.production_countries.length
-          ? data.production_countries.map((country) => country.name).join(", ")
-          : "N/A"}
-      </p>
-      <p>
-        <strong>Spoken Languages:</strong>{" "}
-        {data.spoken_languages.length
-          ? data.spoken_languages
-              .map((language) => language.english_name)
-              .join(", ")
-          : "N/A"}
-      </p>
-      <p>
-        <strong>Production Companies:</strong>{" "}
-        {data.production_companies.length
-          ? data.production_companies.map((company) => company.name).join(", ")
-          : "N/A"}
-      </p>
+      {/* Content */}
+      <div className="flex flex-col gap-6 sm:flex-row">
+        {/* Poster (desktop) */}
+        {data.poster_path && (
+          <div className="hidden shrink-0 sm:block">
+            <LazyImage
+              src={tmdbImageUrl(data.poster_path, "w342")}
+              alt={`${data.title} poster`}
+              width={POSTER_DIMENSIONS.w342.width}
+              height={POSTER_DIMENSIONS.w342.height}
+              className="w-48 rounded-xl shadow-lg"
+            />
+          </div>
+        )}
+
+        {/* Details */}
+        <div className="flex-1 space-y-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              {data.title}
+            </h1>
+            {data.tagline && (
+              <p className="mt-1 text-sm italic text-muted-foreground">
+                "{data.tagline}"
+              </p>
+            )}
+          </div>
+
+          {/* Meta chips */}
+          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            {year && <span>{year}</span>}
+            {hours !== null && mins !== null && (
+              <>
+                <span className="text-border">|</span>
+                <span>{hours}h {mins}m</span>
+              </>
+            )}
+            {data.vote_average > 0 && (
+              <>
+                <span className="text-border">|</span>
+                <span className="font-medium text-foreground">
+                  {data.vote_average.toFixed(1)}
+                </span>
+                <span>/ 10</span>
+              </>
+            )}
+            {data.status && (
+              <>
+                <span className="text-border">|</span>
+                <Badge variant="outline" className="text-xs">{data.status}</Badge>
+              </>
+            )}
+          </div>
+
+          {/* Genres */}
+          {data.genres.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {data.genres.map((genre) => (
+                <Badge key={genre.id} variant="secondary" className="text-xs">
+                  {genre.name}
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          <Separator />
+
+          {/* Overview */}
+          {data.overview && (
+            <div>
+              <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                Overview
+              </h2>
+              <p className="text-sm leading-relaxed text-foreground">
+                {data.overview}
+              </p>
+            </div>
+          )}
+
+          <Separator />
+
+          {/* Details grid */}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+            <Detail label="Original Title" value={data.original_title} />
+            <Detail label="Language" value={data.original_language?.toUpperCase()} />
+            <Detail label="Budget" value={data.budget ? `$${data.budget.toLocaleString()}` : "N/A"} />
+            <Detail label="Revenue" value={data.revenue ? `$${data.revenue.toLocaleString()}` : "N/A"} />
+            <Detail label="Vote Count" value={data.vote_count.toLocaleString()} />
+            {data.homepage && (
+              <div>
+                <span className="text-muted-foreground">Homepage</span>
+                <a
+                  href={data.homepage}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-0.5 block truncate text-primary hover:underline"
+                >
+                  Visit site
+                </a>
+              </div>
+            )}
+          </div>
+
+          {/* Production companies */}
+          {data.production_companies.length > 0 && (
+            <>
+              <Separator />
+              <div>
+                <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Production
+                </h2>
+                <p className="text-sm text-foreground">
+                  {data.production_companies.map((c) => c.name).join(", ")}
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string | number | undefined }) {
+  if (!value) return null;
+  return (
+    <div>
+      <span className="text-muted-foreground">{label}</span>
+      <p className="mt-0.5 font-medium text-foreground">{value}</p>
     </div>
   );
 }
