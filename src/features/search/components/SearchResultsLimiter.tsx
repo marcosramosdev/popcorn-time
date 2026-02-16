@@ -10,22 +10,21 @@ function SearchResultsLimiter({
   onChange,
 }: SearchResultsLimiterProps) {
   return (
-    <>
-      <label>
-        Show
-        <select
-          value={value}
-          onChange={(event) => onChange(Number(event.target.value))}
-        >
-          {options.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-        movies per page
-      </label>
-    </>
+    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <span>Show</span>
+      <select
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        className="rounded-md border border-input bg-background px-2 py-1 text-sm text-foreground shadow-sm transition-colors focus:outline-none focus:ring-1 focus:ring-ring"
+      >
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+      <span>per page</span>
+    </div>
   );
 }
 

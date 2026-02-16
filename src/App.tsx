@@ -1,37 +1,41 @@
+import { lazy, Suspense } from "react";
 import type { ReactElement } from "react";
 import Layout from "./layout/Layout";
 import { Route, Routes, BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Movies from "./pages/Movies";
+import PageSkeleton from "./components/PageSkeleton";
+
+// Home fica no bundle inicial (é a landing page)
 import Home from "./pages/Home";
-import Shows from "./pages/Shows";
-import SearchMoviesPage from "./pages/SearchMoviesPage";
-import MovieDetailsPage from "./pages/MovieDetailsPage";
-import FavoritesPage from "./pages/FavoritesPage";
+
+// Lazy loading das demais páginas — cada uma gera um chunk separado
+const Movies = lazy(() => import("./pages/Movies"));
+const Shows = lazy(() => import("./pages/Shows"));
+const SearchMoviesPage = lazy(() => import("./pages/SearchMoviesPage"));
+const MovieDetailsPage = lazy(() => import("./pages/MovieDetailsPage"));
+const FavoritesPage = lazy(() => import("./pages/FavoritesPage"));
 
 const queryClient = new QueryClient();
 
 function App(): ReactElement {
   return (
-    <Layout>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/movies" element={<Movies />} />
-            <Route path="/movies/new" element={<h1>movies on theater</h1>} />
-            <Route path="/movies/:id" element={<MovieDetailsPage />} />
-            <Route path="/movies/search" element={<SearchMoviesPage />} />
-            <Route path="/favorites" element={<FavoritesPage />} />
-            <Route path="/shows" element={<Shows />} />
-            <Route
-              path="/favorites"
-              element={<h1>Favorites saved movies</h1>}
-            />
-          </Routes>
-        </BrowserRouter>
-      </QueryClientProvider>
-    </Layout>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Layout>
+          <Suspense fallback={<PageSkeleton />}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/movies" element={<Movies />} />
+              <Route path="/movies/new" element={<h1>movies on theater</h1>} />
+              <Route path="/movies/:id" element={<MovieDetailsPage />} />
+              <Route path="/movies/search" element={<SearchMoviesPage />} />
+              <Route path="/favorites" element={<FavoritesPage />} />
+              <Route path="/shows" element={<Shows />} />
+            </Routes>
+          </Suspense>
+        </Layout>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 

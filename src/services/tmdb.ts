@@ -1,5 +1,39 @@
 const URL = "https://api.themoviedb.org/3";
 
+// ── TMDB Image CDN ──────────────────────────────────────────────────
+// Docs: https://developer.themoviedb.org/docs/image-basics
+export const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p";
+
+/** Tamanhos de poster disponíveis na CDN do TMDB */
+export type TmdbPosterSize = "w92" | "w154" | "w185" | "w342" | "w500" | "w780" | "original";
+
+/** Tamanhos de backdrop disponíveis na CDN do TMDB */
+export type TmdbBackdropSize = "w300" | "w780" | "w1280" | "original";
+
+/** Dimensões intrínsecas (em px) para cada tamanho de poster do TMDB */
+export const POSTER_DIMENSIONS: Record<TmdbPosterSize, { width: number; height: number }> = {
+  w92:       { width: 92,   height: 138 },
+  w154:      { width: 154,  height: 231 },
+  w185:      { width: 185,  height: 278 },
+  w342:      { width: 342,  height: 513 },
+  w500:      { width: 500,  height: 750 },
+  w780:      { width: 780,  height: 1170 },
+  original:  { width: 780,  height: 1170 },
+};
+
+/** Dimensões intrínsecas (em px) para cada tamanho de backdrop do TMDB */
+export const BACKDROP_DIMENSIONS: Record<TmdbBackdropSize, { width: number; height: number }> = {
+  w300:      { width: 300,  height: 169 },
+  w780:      { width: 780,  height: 439 },
+  w1280:     { width: 1280, height: 720 },
+  original:  { width: 1920, height: 1080 },
+};
+
+/** Monta a URL completa de uma imagem do TMDB */
+export function tmdbImageUrl(path: string, size: TmdbPosterSize | TmdbBackdropSize = "w500"): string {
+  return `${TMDB_IMAGE_BASE}/${size}${path}`;
+}
+
 export type Movie = {
   id: number;
   title: string;
@@ -14,6 +48,9 @@ export type Show = {
   name: string;
   overview: string;
   popularity: number;
+  poster_path: string | null;
+  vote_average: number;
+  first_air_date: string;
 };
 
 export type PopularShowsResponse = {
